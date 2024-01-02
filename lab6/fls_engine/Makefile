@@ -1,30 +1,46 @@
-CXX := g++
-CXXFLAGS:=-Wall -O3
 
-SRCS = shader vertex_bundle sobject engine gobject component
-OBJECTS = $(patsubst %, %.o, $(SRCS))
+CC = g++
+CFLAGS = -O3
 AR = ar crv
 
-libflsengine.a: $(OBJECTS)
-	$(AR) $@ $(OBJECTS)
+TARGET  = libflsengine.a
+OBJ_DIR = ./obj
+SRC_DIR = ./src
+DEP_DIR = ./dep
+INCLUDE_DIR = ./include
+ 
+SRC = $(wildcard $(SRC_DIR)/*.cpp)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp, %.o, $(SRC))
+ 
+vpath %.o $(OBJ_DIR)
+vpath %.h $(INCLUDE_DIR)
+vpath %.cpp $(SRC_DIR)
+vpath %.d $(DEP_DIR)
+ 
+all: $(TARGET)
+ 
+$(TARGET) : create_dir $(OBJECTS)
+	$(AR) $(TARGET) $(addprefix $(OBJ_DIR)/, $(OBJECTS))
+ 
+%.o : %.cpp %.d
+	$(CC) $(CFLAGS) -c $< -I$(INCLUDE_DIR) -o $(OBJ_DIR)/$@
 
-shader.o: shader.cpp shader.h vertex_bundle.h texture.h sobject.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+%.d: %.cpp
+	@set -e;\
+	rm -f $(DEP_DIR)/$@;\
+	$(CC) -M $(CFLAGS) -I$(INCLUDE_DIR) $< > $(DEP_DIR)/$@.$$$$;\
+	sed 's,\($*\)\.o[ :]*,\1.o $(DEP_DIR)/$@ : ,g' < $(DEP_DIR)/$@.$$$$ > $(DEP_DIR)/$@;\
+	rm -f $(DEP_DIR)/$@.$$$$
 
-vertex_bundle.o: vertex_bundle.cpp vertex_bundle.h texture.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+-include $(patsubst $(SRC_DIR)/%.cpp, $(DEP_DIR)/%.d, $(SRC))
 
-sobject.o: sobject.cpp sobject.h vertex_bundle.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-engine.o: engine.cpp engine.h typedef.h gobject.h component.h shader.h 
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+create_dir:
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(DEP_DIR)
 
-gobject.o: gobject.cpp gobject.h engine.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-component.o: component.cpp component.h engine.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
+.PHONY : clean
 clean:
-	rm *.o
+	rm -rf $(TARGET) $(OBJ_DIR)/*.o $(DEP_DIR)/*.d

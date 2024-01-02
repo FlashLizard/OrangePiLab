@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <time.h>
 
-#include "fls_engine/engine.h"
+#include "fls_engine/include/engine.h"
 #include "fb_tools.h"
 
 using glm::vec3;
@@ -90,6 +90,7 @@ void test2()
     scube->transform(glm::translate(one, glm::vec3(-1.2, 0, 0)));
     ocube->transform(glm::translate(one, glm::vec3(0, -1.2, 0)));
     bcube->transform(glm::translate(one, glm::vec3(0, 1.2, 0)));
+    tlshader.setWolrdLigth(glm::vec4(0, 0, 0,1));
     while (true)
     {
         shaderRunner.clearBuffer(FB_COLOR(155, 155, 200), 1000);
@@ -141,6 +142,7 @@ void test3()
     scube->transform(glm::translate(one, glm::vec3(-1.2, 0, 0)));
     ocube->transform(glm::translate(one, glm::vec3(0, -1.2, 0)));
     bcube->transform(glm::translate(one, glm::vec3(0, 1.2, 0)));
+    tlshader.setWolrdLigth(glm::vec4(0, 10, 0,1));
     while (true)
     {
         shaderRunner.clearBuffer(FB_COLOR(155, 155, 200), 1000);

@@ -2,26 +2,24 @@
 EXENAME := lab6
 EXESRCS := main.cpp fb_tools.cpp test.cpp
 
-SUBTASK := main fb_tools test libflsengine
+SUBTASK := libflsengine
+MYLIBS := fls_engine/libflsengine.a
 
 include ../common/rules.mk
 
-MYLIBS := fls_engine/libflsengine.a
+vpath %.h fls_engine/include
 
 libflsengine:
 	cd fls_engine && make
 
-main: main.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@.o $<
-	touch $@
+main.o: main.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-fb_tools: fb_tools.cpp fb_tools.h fls_engine/shader.h fls_engine/engine.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@.o $<
-	touch $@
+fb_tools.o: fb_tools.cpp fb_tools.h engine.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-test: test.cpp fb_tools.h fls_engine/shader.h  fls_engine/engine.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@.o $<
-	touch $@
+test.o: test.cpp fb_tools.h engine.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 clean:
-	rm *.o
+	rm *.o; cd fls_engine && make clean
